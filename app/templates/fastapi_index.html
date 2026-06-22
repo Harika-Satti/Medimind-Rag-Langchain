@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediMind (FastAPI) — AI Medical Document Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --primary-light: #eef2ff;
+            --secondary: #64748b;
+            --dark: #1e1b4b;
+            --light: #ffffff;
+            --bg-page: #f9fafb;
+            --white: #ffffff;
+            --gray: #64748b;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --glass: rgba(255, 255, 255, 0.8);
+            --blur: 12px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --sidebar-width: 320px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--dark);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--white);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .backend-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            border: 1px solid #bae6fd;
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 10px rgba(8, 145, 178, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(8, 145, 178, 0.3);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: var(--dark);
+        }
+
+        /* Main Content */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            background: var(--white);
+            padding: 0;
+            border-radius: 0;
+            border: none;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: #ecfeff;
+        }
+
+        .upload-area i {
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-active {
+            background: #ecfeff;
+            border-color: var(--primary);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Stats Card */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            padding: 12px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Model Switcher */
+        .model-switcher {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .model-tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray);
+        }
+
+        .model-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f1f5f9;
+            position: relative;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            max-width: 85%;
+            display: flex;
+            gap: 14px;
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-message .message-bubble {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai-message .message-bubble {
+            background: white;
+            color: var(--dark);
+            border-bottom-left-radius: 2px;
+            border: 1px solid var(--border);
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        .user-message .message-avatar {
+            background: #cffafe;
+            color: var(--primary);
+        }
+
+        .ai-message .message-avatar {
+            background: #f1f5f9;
+            color: var(--secondary);
+        }
+
+        /* Source Attribution */
+        .sources {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .source-tag {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        /* Input Area */
+        .input-wrapper {
+            padding: 1.5rem 2.5rem 2rem;
+            background: transparent;
+        }
+
+        .input-box {
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            padding: 8px 8px 8px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            max-width: 800px;
+            margin: 0 auto;
+            transition: all 0.2s;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.1);
+        }
+
+        #queryInput {
+            flex: 1;
+            border: none;
+            padding: 10px 0;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--dark);
+        }
+
+        #queryInput::placeholder {
+            color: #94a3b8;
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .send-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--gray);
+            text-align: center;
+            gap: 1.25rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            background: white;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 1rem;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Loading Skeleton */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 5px 0;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success { border-left-color: var(--success); }
+        .toast-error { border-left-color: var(--error); }
+
+        /* Responsive Transitions */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            :root {
+                --sidebar-width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            .app-container {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                height: auto;
+                overflow: visible;
+            }
+            .chat-container {
+                height: 600px;
+            }
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            .logo span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fa-solid fa-brain"></i>
+                <span>MediMind</span>
+            </div>
+            <div class="backend-badge">
+                <i class="fa-solid fa-bolt"></i> FastAPI Edition
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button class="btn btn-outline" onclick="clearSession()">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Clear Session</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                    <span>Document Upload</span>
+                </div>
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <p style="font-size: 0.9rem; font-weight: 500;">Drop PDFs here or click to upload</p>
+                    <p style="font-size: 0.75rem; color: var(--gray);">Multiple files supported</p>
+                    <input type="file" id="fileInput" accept=".pdf" multiple>
+                    
+                    <div class="progress-container" id="uploadProgress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section" id="docCard" style="display: none;">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Analysing Documents</span>
+                </div>
+                <div id="fileList" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Files will appear here -->
+                </div>
+                <div class="stats-grid" style="border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    <div class="stat-item">
+                        <div class="stat-value" id="docPages">0</div>
+                        <div class="stat-label">Total Pages</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="docChunks">0</div>
+                        <div class="stat-label">Total Chunks</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>Project Engine</span>
+                </div>
+                <div class="model-switcher">
+                    <div class="model-tab active" data-model="groq">Groq (Llama 3.3)</div>
+                </div>
+                <p style="font-size: 0.7rem; color: var(--gray); margin-top: 10px;">
+                    <i class="fa-solid fa-bolt"></i> 
+                    Powered by <b>LangChain RAG</b> and <b>Groq</b> for rapid medical document analysis.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <section class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-laptop-medical"></i>
+                    </div>
+                    <h2>Welcome to MediMind</h2>
+                    <p>Upload a medical document or report to begin analyzing with AI.</p>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <div class="input-box">
+                    <input type="text" id="queryInput" placeholder="Ask about the medical document..." disabled autocomplete="off">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast">
+        <i id="toastIcon"></i>
+        <span id="toastMsg"></span>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let sessionId = null;
+        let selectedModel = 'groq';
+        let isLoading = false;
+
+        // UI Selectors
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const queryInput = document.getElementById('queryInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const emptyState = document.getElementById('emptyState');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const fileList = document.getElementById('fileList');
+
+        // File handling
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFileUpload(e.target.files);
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('upload-active');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('upload-active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('upload-active');
+            if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files);
+        });
+
+        async function handleFileUpload(files) {
+            const validFiles = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+            
+            if (validFiles.length === 0) {
+                showToast('Please upload PDF files only', 'error');
+                return;
+            }
+
+            uploadProgress.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += (progress < 90 ? 2 : 0.1);
+                progressBar.style.width = Math.min(progress, 95) + '%';
+            }, 100);
+
+            const formData = new FormData();
+            validFiles.forEach(file => {
+                formData.append('files', file); // Change to 'files' for FastAPI backend
+            });
+            if (sessionId) formData.append('session_id', sessionId);
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                clearInterval(interval);
+                
+                if (response.ok) {
+                    progressBar.style.width = '100%';
+                    sessionId = data.session_id || data.doc_name;
+                    
+                    document.getElementById('docCard').style.display = 'block';
+                    updateFileList(data.all_docs);
+                    document.getElementById('docPages').textContent = data.pages;
+                    document.getElementById('docChunks').textContent = data.chunks;
+                    
+                    queryInput.disabled = false;
+                    sendBtn.disabled = false;
+                    
+                    showToast(`${validFiles.length} file(s) added successfully`, 'success');
+                    setTimeout(() => {
+                        uploadProgress.style.display = 'none';
+                    }, 1500);
+                } else {
+                    showToast(data.detail || data.error || 'Upload failed', 'error');
+                    uploadProgress.style.display = 'none';
+                }
+            } catch (err) {
+                clearInterval(interval);
+                showToast('Server connection failed', 'error');
+                uploadProgress.style.display = 'none';
+            }
+        }
+
+        function updateFileList(docs) {
+            fileList.innerHTML = '';
+            docs.forEach(doc => {
+                const item = document.createElement('div');
+                item.style.cssText = 'font-size: 0.85rem; padding: 10px; background: var(--bg-page); border-radius: 12px; color: var(--dark); display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); transition: all 0.2s ease;';
+                item.className = 'file-item';
+                item.innerHTML = `<i class="fa-solid fa-file-pdf" style="color: var(--primary);"></i> <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">${doc}</span>`;
+                fileList.appendChild(item);
+            });
+        }
+
+        async function sendMessage() {
+            const query = queryInput.value.trim();
+            if (!query || isLoading || !sessionId) return;
+
+            // Set loading state IMMEDIATELY to prevent race conditions
+            isLoading = true;
+            sendBtn.disabled = true;
+
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            addMessage(query, 'user');
+            queryInput.value = '';
+            
+            // Return the actual element reference to ensure we can remove it reliably
+            const loadingMsg = addMessage('', 'ai', true);
+
+            try {
+                const response = await fetch(`${API_BASE}/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query,
+                        model: selectedModel,
+                        doc_name: sessionId
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove loading bubble directly by reference
+                if (loadingMsg && loadingMsg.parentNode) {
+                    loadingMsg.remove();
+                }
+
+                if (response.ok) {
+                    if (data.answer && data.answer.trim()) {
+                        addMessage(data.answer, 'ai', false, data.sources, data.model);
+                    } else {
+                        addMessage('I processed your request but the response was empty.', 'ai');
+                    }
+                } else {
+                    addMessage(data.error || 'Sorry, I encountered an error processing your request.', 'ai');
+                }
+            } catch (err) {
+                if (loadingMsg && loadingMsg.parentNode) {
+                    loadingMsg.remove();
+                }
+                addMessage('Network error. Is the server running?', 'ai');
+            } finally {
+                isLoading = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        function addMessage(text, role, isMsgLoading = false, sources = [], model = '') {
+            // Block empty AI messages if not loading
+            if (!isMsgLoading && !text.trim() && role === 'ai') return null;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+
+            const icon = role === 'user' ? 'fa-user' : 'fa-robot';
+            
+            let content = '';
+            if (isMsgLoading) {
+                content = `
+                    <div class="message-avatar"><i class="fa-solid ${icon}"></i></div>
+                    <div class="message-bubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+                `;
+            } else {
+                let sourceHtml = '';
+                if (sources && sources.length > 0) {
+                    sourceHtml = `<div class="sources">`;
+                    const uniqueFiles = [...new Set(sources.map(s => typeof s === 'string' ? s : s.file))];
+                    uniqueFiles.forEach((fname) => {
+                        sourceHtml += `<div class="source-tag" title="Reference from ${fname}"><i class="fa-solid fa-file-invoice"></i> ${fname}</div>`;
+                    });
+                    sourceHtml += `</div>`;
+                }
+
+                const modelBadge = model ? `<div style="font-size: 0.65rem; color: var(--gray); margin-top: 8px; opacity: 0.7;">via ${model}</div>` : '';
+
+                content = `
+                    <div class="message-avatar"><i class="fa-solid ${icon}"></i></div>
+                    <div class="message-bubble">
+                        ${text.replace(/\n/g, '<br>')}
+                        ${sourceHtml}
+                        ${modelBadge}
+                    </div>
+                `;
+            }
+
+            messageDiv.innerHTML = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return messageDiv;
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msgEl = document.getElementById('toastMsg');
+            toast.className = `toast toast-${type} show`;
+            icon.className = type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation';
+            msgEl.textContent = msg;
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        async function clearSession() {
+            if (confirm('Clear all uploaded documents and history?')) {
+                try {
+                    await fetch(`${API_BASE}/clear`, { method: 'POST' });
+                    window.location.reload();
+                } catch (e) {
+                    window.location.reload();
+                }
+            }
+        }
+
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

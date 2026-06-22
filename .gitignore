@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+vennv/
+.env
+
+# Project Specific
+uploads/*
+vectorstore/*
+!uploads/.gitkeep
+!vectorstore/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
