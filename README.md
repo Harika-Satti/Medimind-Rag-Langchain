@@ -8,8 +8,6 @@
 ![LangChain](https://img.shields.io/badge/LangChain-000000?style=for-the-badge&logo=chainlink&logoColor=white)
 ![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white)
 
----
-
 ## 📌 Table of Contents
 
 - [Overview](#-overview)
@@ -21,15 +19,11 @@
 - [Environment Variables](#-environment-variables)
 - [Contributing](#-contributing)
 
----
-
 ## 🧠 Overview
 
 Medical folders are often filled with dozens of pages of reports — blood tests, MRIs, discharge summaries. Manually finding a specific value or understanding the "big picture" across multiple documents is time-consuming and error-prone.
 
 **MediMind** solves this by letting users *talk* to their entire medical folder. It reads all uploaded PDFs, understands the clinical context, and provides accurate answers with source citations — in plain English.
-
----
 
 ## ✨ Features
 
@@ -43,7 +37,6 @@ Medical folders are often filled with dozens of pages of reports — blood tests
 | 💎 **Premium UI** | Modern glassmorphic interface built for clarity |
 | 🔒 **Privacy First** | Document vectorization happens locally on the server |
 
----
 
 ## 🛠️ Tech Stack
 
@@ -55,8 +48,6 @@ Medical folders are often filled with dozens of pages of reports — blood tests
 | **Embeddings** | HuggingFace `all-MiniLM-L6-v2` | Local, lightweight text vectorization |
 | **Vector Store** | FAISS | Fast similarity search across document chunks |
 | **Frontend** | HTML5 / CSS3 / Vanilla JS | Glassmorphic UI dashboard |
-
----
 
 ## ⚙️ How It Works
 
