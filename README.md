@@ -166,9 +166,3 @@ Contributions are welcome! To get started:
 
 This project is open source and available under the [MIT License](LICENSE).
 
----
-
-<div align="center">
-  <p>Made with ❤️ by <strong>Antigravity AI</strong></p>
-  <p>⭐ Star this repo if you found it helpful!</p>
-</div>
